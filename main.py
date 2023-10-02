@@ -32,7 +32,7 @@ class VenueDistribution:
             data = self.venue_day_time_b50
             rnd_venue_list = random.randint(0, len(data) - 1)
             w_v_d_t = random.choice(data[rnd_venue_list])
-            while self.b50_taken.count(w_v_d_t.strip().split(";")[1]) > 21:
+            while self.b50_taken.count(w_v_d_t.strip().split(";")[1]) > 19:
                 rnd_venue_list = random.randint(0, len(data) - 1)
                 w_v_d_t = random.choice(data[rnd_venue_list])
                 print("error 21 b50")
@@ -43,7 +43,7 @@ class VenueDistribution:
             data = self.venue_day_time_a50
             rnd_venue_list = random.randint(0, len(data) - 1)
             w_v_d_t = random.choice(data[rnd_venue_list])
-            while self.a50_taken.count(w_v_d_t.strip().split(";")[1]) > 21:
+            while self.a50_taken.count(w_v_d_t.strip().split(";")[1]) > 19:
                 rnd_venue_list = random.randint(0, len(data) - 1)
                 w_v_d_t = random.choice(data[rnd_venue_list])
                 print("error 21 a50")
@@ -55,7 +55,7 @@ class VenueDistribution:
             data = self.venue_day_time_b120
             rnd_venue_list = random.randint(0, len(data) - 1)
             w_v_d_t = random.choice(data[rnd_venue_list])
-            while self.b120_taken.count(w_v_d_t.strip().split(";")[1]) > 21:
+            while self.b120_taken.count(w_v_d_t.strip().split(";")[1]) > 19:
                 rnd_venue_list = random.randint(0, len(data) - 1)
                 w_v_d_t = random.choice(data[rnd_venue_list])
                 print("error 21 b120")
@@ -67,7 +67,7 @@ class VenueDistribution:
             data = self.venue_day_time_a120
             rnd_venue_list = random.randint(0, len(data) - 1)
             w_v_d_t = random.choice(data[rnd_venue_list])
-            while self.a120_taken.count(w_v_d_t.strip().split(";")[1]) > 21:
+            while self.a120_taken.count(w_v_d_t.strip().split(";")[1]) > 19:
                 rnd_venue_list = random.randint(0, len(data) - 1)
                 w_v_d_t = random.choice(data[rnd_venue_list])
                 print("error 21 a120")
@@ -187,8 +187,10 @@ class Timetable:
             initial_data = json.load(file)
         return initial_data
 
-    def write(self):
-        pass
+    def write(self, data):
+        with open("tble.json", "w") as file:
+            initial_data = json.dumps(data, indent=4)
+            file.write(initial_data)
 
     def venue_b50(self):
         vnb50 = self.load("venueb50.json")
@@ -264,39 +266,49 @@ class Timetable:
         day_time = random.choice(self.set_venue_day())
         venue_day_time = f"{venue};{day_time}"
 
-        while venue_day_time in self.taken_venue_day_list:
+        programme_day = f"{programme}{day_time.strip().split(';')[0]}"
+
+        while self.taken_programme_day.count(programme_day) > 3:
             day_time = random.choice(self.set_venue_day())
             venue_day_time = f"{venue};{day_time}"
-            # print("ve error", venue_day_time)
-        else:
             programme_day = f"{programme}{day_time.strip().split(';')[0]}"
+            # print("pro error")
 
-            while self.taken_programme_day.count(programme_day) > 3:
-                day_time = random.choice(self.set_venue_day())
-                venue_day_time = f"{venue};{day_time}"
-                programme_day = f"{programme}{day_time.strip().split(';')[0]}"
-                # print("pro error")
-
-            self.taken_venue_day_list.append(venue_day_time)
-            self.taken_programme_day.append(programme_day)
+        self.taken_venue_day_list.append(venue_day_time)
+        self.taken_programme_day.append(programme_day)
 
         return venue_day_time
 
-    def generate_time(self):
+    def set_venue_b21(self):
         venue_distri = VenueDistribution()
         venue_distri.set_venues()
-        self.default_table = self.get_default_table()
+        self.default_table = self.load("tble.json")
         for i in self.default_table:
             # print(i)
             programme_size = self.get_size(i)
             for j in self.default_table[i]:
                 venue_distri.assign_venue(programme_size)
-                module_venue = venue_distri.w_v_d_t
-                # print(module_venue)
-                period_one = self.set_venue_day_time(module_venue, i)
-                period_two = self.set_venue_day_time(module_venue, i)
+                module_venue = venue_distri.w_v_d_t.strip().split(";")[1]
+                if i not in self.timetable:
+                    self.timetable[i] = {}
+
+                self.timetable[i][j] = {
+                    "venue": module_venue,
+                    "module": j,
+                    "program": i,
+                }
+
+        self.write(self.timetable)
+        print(venue_distri.a120_taken.count("CLASS VIII"))
+
+    def generate_table(self):
+        self.set_venue_b21()
+        self.default_table = self.load("tble.json")
+        for i in self.default_table:
+            for j in self.default_table[i]:
+                venue = self.default_table[i][j]["venue"]
+                period_one = self.set_venue_day_time(venue, i)
+                period_two = self.set_venue_day_time(venue, i)
 
 
-
-
-Timetable.generate_time(Timetable())
+Timetable.generate_table(Timetable())
