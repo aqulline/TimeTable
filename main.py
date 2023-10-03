@@ -39,7 +39,7 @@ class VenueDistribution:
             self.b50_taken.append(w_v_d_t.strip().split(";")[1])
             data[rnd_venue_list].remove(w_v_d_t)
             self.w_v_d_t = w_v_d_t
-        elif size <= 70:
+        elif 70 >= size > 40:
             data = self.venue_day_time_a50
             rnd_venue_list = random.randint(0, len(data) - 1)
             w_v_d_t = random.choice(data[rnd_venue_list])
@@ -51,7 +51,7 @@ class VenueDistribution:
             data[rnd_venue_list].remove(w_v_d_t)
             self.w_v_d_t = w_v_d_t
 
-        elif size <= 150:
+        elif 150 >= size > 70:
             data = self.venue_day_time_b120
             rnd_venue_list = random.randint(0, len(data) - 1)
             w_v_d_t = random.choice(data[rnd_venue_list])
@@ -265,6 +265,16 @@ class Timetable:
         venue_day_time = f"{venue};{day_time}"
 
         while venue_day_time in self.taken_venue_day_list:
+<<<<<<< Updated upstream
+=======
+            day_time = random.choice(self.set_venue_day())
+            venue_day_time = f"{venue};{day_time}"
+            print("ve error", venue_day_time, self.taken_venue_day_list.count(venue_day_time))
+
+        programme_day = f"{programme}{day_time.strip().split(';')[0]}"
+
+        while self.taken_programme_day.count(programme_day) > 3:
+>>>>>>> Stashed changes
             day_time = random.choice(self.set_venue_day())
             venue_day_time = f"{venue};{day_time}"
             # print("ve error", venue_day_time)
@@ -282,7 +292,12 @@ class Timetable:
 
         return venue_day_time
 
+<<<<<<< Updated upstream
     def generate_time(self):
+=======
+    error_list = []
+    def set_venue_b21(self):
+>>>>>>> Stashed changes
         venue_distri = VenueDistribution()
         venue_distri.set_venues()
         self.default_table = self.get_default_table()
@@ -291,12 +306,38 @@ class Timetable:
             programme_size = self.get_size(i)
             for j in self.default_table[i]:
                 venue_distri.assign_venue(programme_size)
+<<<<<<< Updated upstream
                 module_venue = venue_distri.w_v_d_t
                 # print(module_venue)
                 period_one = self.set_venue_day_time(module_venue, i)
                 period_two = self.set_venue_day_time(module_venue, i)
 
 
+=======
+                module_venue = venue_distri.w_v_d_t.strip().split(";")[1]
+                if i not in self.timetable:
+                    self.timetable[i] = {}
+
+                self.timetable[i][j] = {
+                    "venue": module_venue,
+                    "module": j,
+                    "program": i,
+                }
+
+        self.write(self.timetable)
+        g = venue_distri.a120_taken.count("CLASS VIII")
+
+
+
+    def generate_table(self):
+        self.set_venue_b21()
+        self.default_table = self.load("tble.json")
+        for i in self.default_table:
+            for j in self.default_table[i]:
+                venue = self.default_table[i][j]["venue"]
+                period_one = self.set_venue_day_time(venue, i)
+                period_two = self.set_venue_day_time(venue, i)
+>>>>>>> Stashed changes
 
 
 Timetable.generate_time(Timetable())
