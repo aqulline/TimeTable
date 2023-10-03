@@ -140,9 +140,14 @@ class Timetable:
         "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
     ]
 
+    days_dict = {'Monday': 'd1', 'Tuesday': 'd2', 'Wednesday': 'd3', 'Thursday': 'd4', 'Friday': 'd5', 'Saturday': 'd6'}
+
     weeks = []
 
     table_time = []
+
+    time_dict = {'7:00-9:00': 't1', '9:00-11:00': 't2', '11:00-13:00': 't3', '13:00-15:00': 't4', '15:00-17:00': 't5',
+                 '17:00-19:00': 't6', '19:00-21:00': 't7'}
 
     venue_day_time_100 = []
 
@@ -238,6 +243,15 @@ class Timetable:
 
         return modules_lits
 
+    def match_table(self, venue_day_time):
+        test = venue_day_time
+        day = self.days_dict[test.strip().split(";")[1]]
+        time = self.time_dict[test.strip().split(";")[2]]
+
+        dt = f"{day}{time}"
+
+        return dt
+
     def get_time(self, time_in, time_out, ranges):
         ti_di = time_out - time_in
         for i in range(int(ti_di / (ranges - 1))):
@@ -307,6 +321,8 @@ class Timetable:
 
         self.write(self.timetable)
 
+    final_table = {}
+
     def generate_table(self):
         self.set_venue_b21()
         self.default_table = self.load("tble.json")
@@ -315,6 +331,23 @@ class Timetable:
                 venue = self.default_table[i][j]["venue"]
                 period_one = self.set_venue_day_time(venue, i)
                 period_two = self.set_venue_day_time(venue, i)
+                period_one_dt = self.match_table(period_one)
+                period_two_dt = self.match_table(period_two)
+
+                if i not in self.final_table:
+                    self.final_table[i] = {}
+
+                self.final_table[i][j] = {
+                    "venue": venue,
+                    "module": j,
+                    "program": i,
+                    "period_one": period_one,
+                    "period_two": period_two,
+                    "period_one_dt": period_one_dt,
+                    "period_two_dt": period_two_dt
+                }
+
+        self.write(self.final_table)
 
 
 Timetable.generate_table(Timetable())
